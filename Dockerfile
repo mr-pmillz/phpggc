@@ -1,5 +1,12 @@
 FROM php:8.1-cli-alpine AS builder
 
+# Fork packaging maintained by mr-pmillz.
+LABEL org.opencontainers.image.title="PHPGGC (mr-pmillz fork)" \
+    org.opencontainers.image.description="PHP Generic Gadget Chains, independently maintained by mr-pmillz" \
+    org.opencontainers.image.source="https://github.com/mr-pmillz/phpggc" \
+    org.opencontainers.image.url="https://github.com/mr-pmillz/phpggc" \
+    org.opencontainers.image.licenses="Apache-2.0"
+
 RUN apk add python3 py3-rich curl
 
 RUN curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer

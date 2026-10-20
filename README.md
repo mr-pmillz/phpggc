@@ -1,5 +1,9 @@
 # PHPGGC: PHP Generic Gadget Chains
 
+This is the independently maintained [mr-pmillz/phpggc](https://github.com/mr-pmillz/phpggc) fork of [ambionics/phpggc](https://github.com/ambionics/phpggc).
+Development, issues, pull requests, and releases are managed in this fork, with `master` as the default development branch.
+Container images are published to `ghcr.io/mr-pmillz/phpggc`. The original project's license and attribution are retained.
+
 *PHPGGC is a library of unserialize() payloads along with a tool to generate them, from command line or programmatically*.
 When encountering an unserialize on a website you don't have the code of, or simply when trying to build an exploit, this tool allows you to generate the payload without having to go through the tedious steps of finding gadgets and combining them. It can be seen as the equivalent of [frohoff's ysoserial](https://github.com/frohoff/ysoserial), but for PHP.
 Currently, the tool supports gadget chains such as: CodeIgniter4, Doctrine, Drupal7, Guzzle, Laravel, Magento, Monolog, Phalcon, Podio, Slim, SwiftMailer, Symfony, Wordpress, Yii and ZendFramework.
@@ -319,7 +323,7 @@ This allows you to tweak the parameters or write exploits more easily.
 
 # Contributing
 
-Pull requests are more than welcome. Please follow these simple guidelines:
+Contributions to this fork are welcome. Open [issues](https://github.com/mr-pmillz/phpggc/issues) and [pull requests](https://github.com/mr-pmillz/phpggc/pulls) in `mr-pmillz/phpggc`, targeting `master`. Please follow these simple guidelines:
 
 - `__destruct()` is always the best vector
 - Specify at least the version of the library you've built the payload on
@@ -329,7 +333,7 @@ Pull requests are more than welcome. Please follow these simple guidelines:
 Codewise, the directory structure is fairly straightforward: gadgets in _gadgets.php_, description + logic in _chain.php_.
 You can define pre- and post- processing methods, if parameters need to be modified.
 Hopefully, the already implemented gadgets should be enough for you to build yours.
-Otherwise, I'd be glad to answer your questions.
+For questions, open an issue in this fork.
 
 Please test as many versions as you can. The nomenclature for versions is as such: `[-]<lower-version> <= <higher-version>[+]`. The `-` and `+` signs indicate that your payload may work on respectively lower and higher versions. For instance, if your gadget chain works from version 2.0.0 to version 4.4.1, which is the last version at the time, use `2.0.0 <= 4.4.1+`.
 
@@ -339,18 +343,37 @@ For instance, use `./phpggc -n Drupal RCE` would create a new Drupal RCE gadgetc
 
 # Docker
 
-If you don't want to install PHP, you can build a docker image using:
+The [release workflow](.github/workflows/release.yml) builds and pushes images to `ghcr.io/mr-pmillz/phpggc` on every push to `master`. It also supports manual runs from the repository's Actions tab on `master`.
+Images support both `linux/amd64` and `linux/arm64` and are published with these tags:
 
-```
-$ docker build . -t 'phpggc'
+- `latest`: the latest successful build from `master`.
+- `master`: the latest successful build from `master`.
+- `sha-<full-commit-sha>`: the build for a specific commit.
+
+Publishing uses the repository's `GITHUB_TOKEN` with `packages: write`; no additional registry secret is required.
+Enable GitHub Actions in the fork if it is disabled. After the first successful publish, set the package's visibility to **Public** if you want unauthenticated pulls; new packages default to private. See [GitHub's Container registry documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+
+Pull and run the published image without installing PHP locally:
+
+```sh
+docker pull ghcr.io/mr-pmillz/phpggc:latest
+docker run --rm ghcr.io/mr-pmillz/phpggc:latest -l
 ```
 
-You can then used the dockerized `phpggc`.
+To build from this fork locally:
+
+```sh
+git clone https://github.com/mr-pmillz/phpggc.git
+cd phpggc
+docker build -t ghcr.io/mr-pmillz/phpggc:local .
+```
+
+Use `ghcr.io/mr-pmillz/phpggc:local` in the examples below to run your local build.
 
 ### To generate a gadget chain
 
 ```
-$ docker run phpggc Monolog/rce1 'system' 'id'
+$ docker run --rm ghcr.io/mr-pmillz/phpggc:latest Monolog/rce1 'system' 'id'
 ```
 
 ### To test a chain 
@@ -358,7 +381,7 @@ $ docker run phpggc Monolog/rce1 'system' 'id'
 Jump to your environment's folder and run the chain argument-free, with the `--test-payload` option:
 
 ```
-$ docker run -v "$(pwd)":/app -w /app phpggc Monolog/RCE9 --test-payload
+$ docker run --rm -v "$(pwd)":/app -w /app ghcr.io/mr-pmillz/phpggc:latest Monolog/RCE9 --test-payload
 ```
 
 ### To generate phar / polyglot files
@@ -366,13 +389,13 @@ $ docker run -v "$(pwd)":/app -w /app phpggc Monolog/RCE9 --test-payload
 > Note: The command must be executed in the directory where the input image is located.
 
 ```
-$ docker run -v "$(pwd)":/images phpggc -pj /images/dummy.jpg -o /images/z.zip.phar Monolog/RCE9 system id
+$ docker run --rm -v "$(pwd)":/images ghcr.io/mr-pmillz/phpggc:latest -pj /images/dummy.jpg -o /images/z.zip.phar Monolog/RCE9 system id
 ```
 
 ### To run `test-gc-compatibility.py`
 
 ```
-$ docker run --entrypoint './test-gc-compatibility.py' phpggc doctrine/doctrine-bundle:2.2,2.7.2 doctrine/rce1 doctrine/rce2
+$ docker run --rm --entrypoint './test-gc-compatibility.py' ghcr.io/mr-pmillz/phpggc:latest doctrine/doctrine-bundle:2.2,2.7.2 doctrine/rce1 doctrine/rce2
 Runing on PHP version ('PHP 8.1.13 (cli) (built: Nov 30 2022 21:53:44) (NTS).
 Testing 2 versions for doctrine/doctrine-bundle against 2 gadget chains.
 
